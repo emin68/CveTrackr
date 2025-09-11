@@ -1,21 +1,35 @@
-# Maven
-/target
-!.mvn/wrapper/maven-wrapper.jar
+HELP.md
+target/
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
 
-# IntelliJ / Eclipse / VSCode
-/.idea
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+
+### IntelliJ IDEA ###
+.idea
+*.iws
 *.iml
-*.classpath
-*.project
-*.settings
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+### VS Code ###
 .vscode/
 
-# OS files
-.DS_Store
-
-# Logs
-*.log
-logs/
-
-# Config sensibles
 src/main/resources/application.properties
