@@ -19,3 +19,8 @@ nvd.api.last-mod-end-date=2025-09-11T14:14:54.182Z
 
 nvd.api.pub-start-date=
 nvd.api.pub-end-date=
+
+# Batch JDBC (facilite les insert groupés)
+spring.jpa.properties.hibernate.jdbc.batch_size=50
+spring.jpa.properties.hibernate.order_inserts=true
+spring.jpa.properties.hibernate.order_updates=true

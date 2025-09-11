@@ -56,4 +56,13 @@ public class CveTrackrApplication {
             }
         };
     }
+    @Bean // déclenche l’ingest au démarrage (temporaire)
+    CommandLineRunner nvdIngest(com.example.service.CveIngestService svc) {
+        return args -> {
+            System.out.println(">>> NVD Ingest (sample 3–5 CVE) -> DB");
+            int n = svc.ingestSample();
+            System.out.println(">>> Upserts: " + n); // attendu: 3–5 puis 0 au 2e run
+        };
+    }
+
 }
