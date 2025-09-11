@@ -6,11 +6,10 @@ nvd.api.cvss-v3-severity=CRITICAL
 nvd.api.has-kev=false
 
 # ===== PostgreSQL =====
-spring.datasource.url=jdbc:postgresql://localhost:5432/nvd_db
-spring.datasource.username=nvd_user
-spring.datasource.password=secret
+spring.datasource.url=jdbc:postgresql://localhost:5432/YOUR_DB_NAME
+spring.datasource.username=YOUR_USERNAME
+spring.datasource.password=YOUR_PASSWORD
 
-# Optionnel mais pratique en dev :
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
 spring.jpa.properties.hibernate.format_sql=true
