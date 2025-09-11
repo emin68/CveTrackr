@@ -1,32 +1,31 @@
 package com.example;
 
-import com.example.cve.Cve;
-import com.example.cve.CveRepository;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;  // <-- important
+import com.example.cve.Cve;                     // entité
+import com.example.cve.CveRepository;           // repo JPA
+import org.springframework.boot.CommandLineRunner; // runner démarrage
+import org.springframework.boot.SpringApplication; // boot
+import org.springframework.boot.autoconfigure.SpringBootApplication; // auto-config
+import org.springframework.context.annotation.Bean; // définir bean
 
-@SpringBootApplication
+@SpringBootApplication // scan composants, auto-config, @Configuration
 public class CveTrackrApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(CveTrackrApplication.class, args);
+        SpringApplication.run(CveTrackrApplication.class, args); // démarrage app
     }
 
-    // S'exécute au démarrage une seule fois (logiquement)
-    @Bean
-    CommandLineRunner demo(CveRepository repo) {
-        return args -> {
-            String testId = "CVE-TEST-0001";
-            if (!repo.existsByCveId(testId)) {     // <-- évite le doublon
-                Cve v = new Cve();
-                v.setCveId(testId);
-                v.setDescription("Row de test pour valider JPA -> Postgres");
-                v.setSeverity("LOW");
-                repo.save(v);
+    @Bean // expose bean au contexte Spring
+    CommandLineRunner demo(CveRepository repo) { // injection repo (DI)
+        return args -> { // lambda = run(String... args)
+            String testId = "CVE-TEST-0001"; // identifiant fonctionnel (clé métier)
+            if (!repo.existsByCveId(testId)) { // anti-doublon (check rapide)
+                Cve v = new Cve();             // nouvelle entité (transient)
+                v.setCveId(testId);            // champ unique (business id)
+                v.setDescription("Row de test pour valider JPA -> Postgres"); // données test
+                v.setSeverity("LOW");          // valeur simple
+                repo.save(v);                  // persist (INSERT) -> transaction JPA
             }
-            System.out.println(">>> CVE rows in DB = " + repo.count());
+            System.out.println(">>> CVE rows in DB = " + repo.count()); // feedback console
         };
     }
 }

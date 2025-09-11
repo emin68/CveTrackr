@@ -1,56 +1,39 @@
 package com.example.cve;
 
-import jakarta.persistence.*;
+import jakarta.persistence.*; // JPA annotations
+
 /**
- * Entité représentant une vulnérabilité CVE stockée en base.
- * Chaque objet de cette classe correspond à une ligne en base.
+ * Entity CVE
+ * - ORM mapping
+ * - Table: cves
  */
-@Entity
-@Table(name = "cves")
+@Entity                       // entité JPA (table SQL)
+@Table(name = "cves")         // nom table explicite
 public class Cve {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;  // ID interne auto-incrémenté
+    @Id                                           // clé primaire
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // auto-incrément (Postgres)
+    private Long id;                               // id technique
 
     @Column(name = "cve_id", nullable = false, unique = true)
-    private String cveId;      // ex: CVE-2024-1234
+    // name: nom colonne ; nullable=false: obligatoire ; unique=true: contrainte unique
+    private String cveId;      // identifiant métier (ex: CVE-2024-1234)
 
-    @Column(columnDefinition = "text") // <-- description longue
-    private String description; // courte description
+    @Column(columnDefinition = "text") // type SQL TEXT (long)
+    private String description; // description longue
 
-    private String severity;    // niveau de sévérité (LOW, MEDIUM, HIGH, CRITICAL)
+    private String severity;    // LOW/MEDIUM/HIGH/CRITICAL (valeur simple)
 
-    // --- Getters/Setters ---
-    public Long getId() {
-        return id;
-    }
+    // --- Getters/Setters (JavaBean) ---
+    public Long getId() { return id; }                 // getter id
+    public void setId(Long id) { this.id = id; }       // setter id
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getCveId() { return cveId; }         // getter cveId
+    public void setCveId(String cveId) { this.cveId = cveId; } // setter cveId
 
-    public String getCveId() {
-        return cveId;
-    }
+    public String getDescription() { return description; }     // getter description
+    public void setDescription(String description) { this.description = description; } // setter description
 
-    public void setCveId(String cveId) {
-        this.cveId = cveId;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getSeverity() {
-        return severity;
-    }
-
-    public void setSeverity(String severity) {
-        this.severity = severity;
-    }
+    public String getSeverity() { return severity; }   // getter severity
+    public void setSeverity(String severity) { this.severity = severity; } // setter severity
 }
