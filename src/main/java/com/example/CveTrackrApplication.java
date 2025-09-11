@@ -13,7 +13,7 @@ public class CveTrackrApplication {
     public static void main(String[] args) {
         SpringApplication.run(CveTrackrApplication.class, args); // démarrage app
     }
-
+    //test la connexion a la bdd
     @Bean // expose bean au contexte Spring
     CommandLineRunner demo(CveRepository repo) { // injection repo (DI)
         return args -> { // lambda = run(String... args)
@@ -28,10 +28,18 @@ public class CveTrackrApplication {
             System.out.println(">>> CVE rows in DB = " + repo.count()); // feedback console
         };
     }
+
+    //test le get via lurl
     @Bean
     CommandLineRunner nvdSmoke(com.example.nvd.NvdClient nvd) {
         return args -> {
-            nvd.logBuiltUrl(); // just log (no HTTP yet)
+            System.out.println(">>> NVD Smoke Test: Fetch + Parse");
+            try {
+                nvd.fetchAndLogSample(); // appelle la nouvelle méthode
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         };
     }
+
 }
