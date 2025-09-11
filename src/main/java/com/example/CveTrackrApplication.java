@@ -6,6 +6,9 @@ import org.springframework.boot.CommandLineRunner; // runner démarrage
 import org.springframework.boot.SpringApplication; // boot
 import org.springframework.boot.autoconfigure.SpringBootApplication; // auto-config
 import org.springframework.context.annotation.Bean; // définir bean
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 @SpringBootApplication // scan composants, auto-config, @Configuration
 public class CveTrackrApplication {
@@ -29,6 +32,18 @@ public class CveTrackrApplication {
         };
     }
 
+    @Bean
+    CommandLineRunner showDates() {
+        return args -> {
+            var nowUtc = ZonedDateTime.now(ZoneOffset.UTC);     // <-- UTC strict
+            var start  = nowUtc.minusDays(30);
+
+            var fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"); // <-- suffixe Z
+            System.out.println("Start date (30j): " + start.format(fmt));
+            System.out.println("End date (now):   " + nowUtc.format(fmt));
+        };
+    }
+
     //test le get via lurl
     @Bean
     CommandLineRunner nvdSmoke(com.example.nvd.NvdClient nvd) {
@@ -41,5 +56,4 @@ public class CveTrackrApplication {
             }
         };
     }
-
 }
