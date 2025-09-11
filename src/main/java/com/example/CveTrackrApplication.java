@@ -28,4 +28,10 @@ public class CveTrackrApplication {
             System.out.println(">>> CVE rows in DB = " + repo.count()); // feedback console
         };
     }
+    @Bean
+    CommandLineRunner nvdSmoke(com.example.nvd.NvdClient nvd) {
+        return args -> {
+            nvd.logBuiltUrl(); // just log (no HTTP yet)
+        };
+    }
 }
