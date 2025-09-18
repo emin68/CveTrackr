@@ -1,4 +1,10 @@
 package com.example.nvd;
+/**
+ * Rôle: Objet de transfert (DTO) représentant une CVE telle que renvoyée par la NVD.
+ * Ne pas persister cet objet tel quel en DB (utiliser l’entity Cve).
+DTO = Data Transfer Object = objet de transport de données.
+→ Sert à transférer des infos entre couches/systèmes (ex : réponse de l’API NVD, ou payload HTTP).
+**/
 
 // DTO minimal pour porter API -> Service -> DB
 public class CveItem {

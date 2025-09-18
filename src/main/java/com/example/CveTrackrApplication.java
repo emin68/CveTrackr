@@ -5,12 +5,16 @@ import com.example.cve.CveRepository;           // repo JPA
 import org.springframework.boot.CommandLineRunner; // runner démarrage
 import org.springframework.boot.SpringApplication; // boot
 import org.springframework.boot.autoconfigure.SpringBootApplication; // auto-config
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean; // définir bean
 import java.time.ZonedDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+import com.example.config.DateRangeProperties;
+
 @SpringBootApplication // scan composants, auto-config, @Configuration
+@EnableConfigurationProperties(DateRangeProperties.class)
 public class CveTrackrApplication {
 
     public static void main(String[] args) {

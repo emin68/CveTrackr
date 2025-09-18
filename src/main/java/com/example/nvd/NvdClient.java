@@ -18,6 +18,12 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;    // arbre JSON
 import com.fasterxml.jackson.databind.ObjectMapper; // parseur JSON
 
+/**
+ * Rôle: Appeler l'API NVD et récupérer les CVE brutes (JSON) pour une date donnée,
+ * puis les convertir en NvdCveDto (pas d’accès DB ici).
+ */
+
+
 @Component // bean Spring (injectable dans un runner, service, etc.)
 public class NvdClient {
 
@@ -115,7 +121,7 @@ public class NvdClient {
         System.out.println("[NVD] totalResults = " + total);
 
         JsonNode vulns = root.path("vulnerabilities"); // liste JSON des vulnérabilités
-        int limit = Math.min(5, vulns.size());         // borne max d'affichage = 5
+        int limit = Math.min(resultsPerPage, vulns.size());         // borne max d'affichage = 5
         for (int i = 0; i < limit; i++) {              // boucle bornée
             JsonNode cve = vulns.get(i).path("cve");   // sous-objet "cve"
             String id = cve.path("id").asText("");     // identifiant CVE (fallback "")
@@ -131,8 +137,8 @@ public class NvdClient {
         if (root == null) return List.of();              // sécurité: pas de données -> liste vide
 
         JsonNode vulns = root.path("vulnerabilities");   // tableau d'objets "vulnerability"
-        int limit = Math.min(5, vulns.size());           // max 5 items
-        List<CveItem> out = new ArrayList<>(limit);      // liste résultat (capacité initiale = limit)
+        int limit = Math.min(resultsPerPage, vulns.size());           // max 5 items
+        List<CveItem> out = new ArrayList<>(Math.min(resultsPerPage, vulns.size())); // liste résultat (capacité initiale = limit)
 
         for (int i = 0; i < limit; i++) {                // boucle bornée
             JsonNode cve = vulns.get(i).path("cve");     // extrait le sous-objet "cve"

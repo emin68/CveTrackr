@@ -10,6 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Rôle: Orchestration de l’ingestion: forcer NvdApiClient -> mapper -> enregistrer via CveRepository.
+ * Ne fait pas d'appel HTTP direct ni de SQL brut: délègue aux composants dédiés.
+ */
+
 @Service // logique métier: API -> DB
 public class CveIngestService {
     private final NvdClient nvd;
