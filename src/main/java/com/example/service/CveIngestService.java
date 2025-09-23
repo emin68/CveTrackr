@@ -4,10 +4,12 @@ import com.example.cve.Cve;
 import com.example.cve.CveRepository;
 import com.example.nvd.CveItem;
 import com.example.nvd.NvdClient;
+import com.example.nvd.NvdDateUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.LocalDate;
 import java.util.*;
+import com.example.config.DateRangeProperties;
 import java.util.stream.Collectors;
 
 /**
@@ -49,8 +51,26 @@ public class CveIngestService {
             }
         }
 
+
         // 5) insertion batch (1 appel)
         if (!toSave.isEmpty()) repo.saveAll(toSave);
         return toSave.size(); // nb de nouvelles lignes
+    }
+
+    // version minimale pour tester la route (à améliorer ensuite)
+    public String ingestBetween(LocalDate debut, LocalDate fin) {
+        LocalDate s = (debut != null) ? debut : dates.getStartDate();
+        LocalDate e = (fin   != null) ? fin   : dates.getEndDate();
+        if (s == null || e == null) {
+            throw new IllegalStateException("Dates par défaut manquantes (cve.start-date / cve.end-date).");
+        }
+
+        String startIso = NvdDateUtils.localDateToNvdDate(s);
+        String endIso   = NvdDateUtils.localDateToNvdDate(e.plusDays(1)); // borne fin exclusive
+
+        // TODO (ensuite) : appeler le client NVD avec ces 2 valeurs, paginer, sauvegarder
+        // nvd.fetchBetween(startIso, endIso, startIndex, pageSize);
+
+        return "Ingestion demandée pour la période " + s + " → " + e;
     }
 }
