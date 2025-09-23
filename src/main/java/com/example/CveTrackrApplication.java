@@ -49,6 +49,7 @@ public class CveTrackrApplication {
     }
 
     //test le get via lurl
+    /*
     @Bean
     CommandLineRunner nvdSmoke(com.example.nvd.NvdClient nvd) {
         return args -> {
@@ -60,6 +61,8 @@ public class CveTrackrApplication {
             }
         };
     }
+    */
+    /*
     @Bean // déclenche l’ingest au démarrage (temporaire)
     CommandLineRunner nvdIngest(com.example.service.CveIngestService svc) {
         return args -> {
@@ -68,5 +71,5 @@ public class CveTrackrApplication {
             System.out.println(">>> Upserts: " + n); // attendu: 3–5 puis 0 au 2e run
         };
     }
-
+    */
 }

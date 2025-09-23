@@ -21,10 +21,13 @@ import java.util.stream.Collectors;
 public class CveIngestService {
     private final NvdClient nvd;
     private final CveRepository repo;
+    private final DateRangeProperties dates;
 
-    public CveIngestService(NvdClient nvd, CveRepository repo) {
+
+    public CveIngestService(NvdClient nvd, CveRepository repo, DateRangeProperties dates) {
         this.nvd = nvd;
         this.repo = repo;
+        this.dates = dates;
     }
 
     @Transactional // une seule transaction: propre & rapide
