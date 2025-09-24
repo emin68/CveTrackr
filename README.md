@@ -45,6 +45,7 @@ src/main/java/com/example
 ├─ CveController.java # GET/POST CVE endpoints
 └─ IngestionController.java # POST ingestion endpoint(s)
 
+
 ## Tech Stack
 
 - **Java 17**
@@ -65,39 +66,51 @@ src/main/java/com/example
   - v2: command is `docker compose`
 - **Java 17** (only for building the JAR locally)
 - **PostgreSQL** with a database and user:
-
+```
 
 # Create your local env file from the example:
 
 ```bash
 cp .env.example .env
 # edit values if you need to
+```
 
 # Clone the repo
+```bash
 git clone https://github.com/emin68/CveTrackr.git
 cd CveTrackr
+```
 
 # Configure your .properties
+```bash
 cp src/main/resources/application.properties.example src/main/resources/application.properties
-
+```
 
 ## TO RUN
 
 - Build the jar :
+```bash
 	./mvnw -Dmaven.test.skip=true clean package
+```
 	
 -Compose v1 :
+```bash
 	docker-compose build
 	docker-compose up -d
+```
 	
 -Compose v2 :
+```bash
 	docker compose build
 	docker compose up -d
-
+```
 -Check :
+```bash
 	curl http://localhost:8080/health
 	curl http://localhost:8080/cves
-
+```
 -Stop :
+```bash
 	docker-compose down
 	# or: docker compose down
+```
