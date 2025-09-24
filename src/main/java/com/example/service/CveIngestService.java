@@ -60,20 +60,53 @@ public class CveIngestService {
         return toSave.size(); // nb de nouvelles lignes
     }
 
-    // version minimale pour tester la route (à améliorer ensuite)
-    public String ingestBetween(LocalDate debut, LocalDate fin) {
-        LocalDate s = (debut != null) ? debut : dates.getStartDate();
-        LocalDate e = (fin   != null) ? fin   : dates.getEndDate();
+    /**
+     * Lance l’ingestion sur une période.
+     * - Si les paramètres sont null → utilise les dates par défaut (DateRangeProperties).
+     * - Convertit les LocalDate au format NVD (ISO UTC), fin EXCLUSIVE = fin + 1 jour.
+     * - Appelle la NVD en 1 seule page (pageSize=2000), mappe et enregistre.
+     * - Ignore les doublons (index unique conseillé sur cve_id).
+     * @return résumé texte (insérées / doublons / période)
+     */
+    public String ingestBetween(java.time.LocalDate debut, java.time.LocalDate fin) {
+        // 1) Choix des dates effectives (paramètres si présents, sinon valeurs par défaut)
+        java.time.LocalDate s = (debut != null) ? debut : dates.getStartDate();
+        java.time.LocalDate e = (fin   != null) ? fin   : dates.getEndDate();
         if (s == null || e == null) {
             throw new IllegalStateException("Dates par défaut manquantes (cve.start-date / cve.end-date).");
         }
 
-        String startIso = NvdDateUtils.localDateToNvdDate(s);
-        String endIso   = NvdDateUtils.localDateToNvdDate(e.plusDays(1)); // borne fin exclusive
+        // 2) Conversion vers le format attendu par la NVD (ISO UTC 'Z')
+        //    Borne fin EXCLUSIVE: on ajoute 1 jour pour couvrir toute la journée 'fin'
+        String startIso = com.example.nvd.NvdDateUtils.localDateToNvdDate(s);
+        String endIso   = com.example.nvd.NvdDateUtils.localDateToNvdDate(e.plusDays(1));
 
-        // TODO (ensuite) : appeler le client NVD avec ces 2 valeurs, paginer, sauvegarder
-        // nvd.fetchBetween(startIso, endIso, startIndex, pageSize);
+        // 3) Appel NVD (version simple: une seule grosse page)
+        java.util.List<com.example.nvd.CveItem> items;
+        try {
+            items = nvd.fetchByRangeOnce(startIso, endIso, 2000);
+        } catch (Exception ex) {
+            return "Erreur NVD: " + ex.getMessage();
+        }
 
-        return "Ingestion demandée pour la période " + s + " → " + e;
+        // 4) Mapping + insert en base, comptage des doublons
+        int inserted = 0, duplicates = 0;
+        for (var it : items) {
+            var ent = new com.example.cve.Cve();
+            ent.setCveId(it.cveId);
+            ent.setDescription(it.description);
+            ent.setSeverity((it.severity == null || it.severity.isBlank()) ? "UNKNOWN" : it.severity.toUpperCase());
+            try {
+                repo.save(ent);       // insertion
+                inserted++;
+            } catch (org.springframework.dao.DataIntegrityViolationException d) {
+                // doublon (si index unique sur cve_id) → on ignore
+                duplicates++;
+            }
+        }
+
+        // 5) Résumé pour l'appelant (Postman verra ça)
+        return "Insérées " + inserted + " (doublons: " + duplicates + ") pour " + s + " → " + e;
     }
+
 }

@@ -60,6 +60,38 @@ public class NvdClient {
 
     private final ObjectMapper mapper = new ObjectMapper(); // parseur JSON partagé
 
+
+    /**
+     * Appelle la NVD UNE FOIS sur une plage de dates (ISO UTC) en réutilisant la logique existante.
+     * On écrase temporairement les props interne (lastModStart/End + resultsPerPage),
+     * on appelle fetchSampleItems(), puis on RESTAURE les anciennes valeurs.
+     * @param startIso  ex: "2025-09-10T00:00:00.000Z"
+     * @param endIso    ex: "2025-09-13T00:00:00.000Z" (borne FIN EXCLUSIVE: fin+1j à 00:00Z)
+     * @param pageSize  nb d’items demandés (ex: 2000). Si <=0, on garde la valeur des props.
+     * @return          liste de CveItem parsés (taille <= pageSize)
+     * @throws Exception erreur réseau/parse
+     */
+    public java.util.List<CveItem> fetchByRangeOnce(String startIso, String endIso, int pageSize) throws Exception {
+        // sauvegarde des valeurs actuelles (on les remettra dans le finally)
+        String oldStart = this.lastModStart;
+        String oldEnd   = this.lastModEnd;
+        int    oldRpp   = this.resultsPerPage;
+        try {
+            // surcharge TEMPORAIRE pour cet appel
+            this.lastModStart   = startIso;
+            this.lastModEnd     = endIso;
+            if (pageSize > 0) this.resultsPerPage = pageSize;
+
+            // on réutilise ton pipeline existant: buildUrl() → HTTP → parse → CveItem
+            return fetchSampleItems();
+        } finally {
+            // RESTAURE l’état initial pour ne pas impacter les appels suivants
+            this.lastModStart   = oldStart;
+            this.lastModEnd     = oldEnd;
+            this.resultsPerPage = oldRpp;
+        }
+    }
+
     // ===== 1) Construction d'URL (pas d'appel réseau) =====
     // mots-clés: params, encodage, query string, lisibilité
     public String buildUrl() {
