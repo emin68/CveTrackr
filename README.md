@@ -8,16 +8,22 @@ and stores the results in a **PostgreSQL database** using **Spring Boot 3** and 
 
 ##  Features
 
--  **NVD API connection**: fetch CVE data in JSON (REST API v2.0).
--  **PostgreSQL storage**:
-  - Entity `Cve` (`id`, `cveId`, `description`, `severity`).
-  - `description` column set to `TEXT` (supports long descriptions).
--  **Duplicate prevention**: insert only if `cveId` is not already present.
--  **Batch insertion optimization** with `saveAll()` and Hibernate batch settings.
--  **Time filters**:
-  - `lastModStartDate` / `lastModEndDate` (recently modified CVEs).
-  - `pubStartDate` / `pubEndDate` (recently published CVEs) – **ready to activate**.
--  Pagination and Upsert (update existing CVEs).
+- **NVD API v2.0**: fetch CVE data (JSON).
+- **PostgreSQL storage**:
+  - Entity `Cve (id, cveId, description TEXT, severity)`.
+  - **Duplicate prevention** (`existsByCveId`), **batch inserts**.
+- **Time filters**: `lastModStartDate / lastModEndDate`, `pubStartDate / pubEndDate`.
+- **Upsert** strategy (update on existing IDs) & pagination support.
+- **HTTP API**:
+  - `GET /health` → `"OK"`
+  - `GET /cves` → list (simple pagination)
+  - `GET /cves/count` → row count
+  - **POST endpoints**: you can **create CVEs** and **trigger ingestion** (see **Testing**).
+
+- **Containerized**:
+  - **Dockerfile** for the app image.
+  - **docker-compose** to run **app + Postgres in one command**.
+  - **Volume** for DB persistence.
 
 ---
 
@@ -25,16 +31,19 @@ and stores the results in a **PostgreSQL database** using **Spring Boot 3** and 
 
 ```text
 src/main/java/com/example
- ├── CveTrackrApplication.java       # Main Spring Boot app
- ├── cve/
- │    ├── Cve.java                   # JPA entity
- │    └── CveRepository.java         # Spring Data JPA repository
- ├── nvd/
- │    ├── NvdClient.java             # NVD API client (HTTP, JSON parsing)
- │    └── CveItem.java               # DTO (API -> DB)
- └── service/
-      └── CveIngestService.java      # Batch ingestion service
-
+├─ CveTrackrApplication.java # Spring Boot main
+├─ cve/
+│ ├─ Cve.java # JPA entity
+│ └─ CveRepository.java # Spring Data JPA repo
+├─ nvd/
+│ ├─ NvdClient.java # HTTP client for NVD API
+│ ├─ CveItem.java # DTO (API → DB)
+│ └─ NvdDateUtils.java # date helpers (NVD filters/ranges)
+├─ service/
+│ └─ CveIngestService.java # batch ingestion
+└─ web/
+├─ CveController.java # GET/POST CVE endpoints
+└─ IngestionController.java # POST ingestion endpoint(s)
 
 ## Tech Stack
 
@@ -44,19 +53,25 @@ src/main/java/com/example
 - **PostgreSQL**
 - **Jackson** (JSON parsing)
 - **Maven** (build/dependency management)
+- **Docker** + **docker-compose** (v1 or v2)
 
 ---
 
 ## Requirements
 
-- **Java 17+** installed
+- **Docker** installed & running
+- **docker-compose**
+  - v1: command is `docker-compose`
+  - v2: command is `docker compose`
+- **Java 17** (only for building the JAR locally)
 - **PostgreSQL** with a database and user:
 
-```sql
-CREATE DATABASE nvd_db;
-CREATE USER nvd_user WITH ENCRYPTED PASSWORD 'secret';
-GRANT ALL PRIVILEGES ON DATABASE nvd_db TO nvd_user;
 
+# Create your local env file from the example:
+
+```bash
+cp .env.example .env
+# edit values if you need to
 
 # Clone the repo
 git clone https://github.com/emin68/CveTrackr.git
@@ -66,11 +81,23 @@ cd CveTrackr
 cp src/main/resources/application.properties.example src/main/resources/application.properties
 
 
-To run
-./mvnw spring-boot:run
+## TO RUN
 
-Check the Database
-psql -U nvd_user -d nvd_db -h localhost
-SELECT id, cve_id, severity, LEFT(description,80) FROM cves ORDER BY id DESC LIMIT 5;
+- Build the jar :
+	./mvnw -Dmaven.test.skip=true clean package
+	
+-Compose v1 :
+	docker-compose build
+	docker-compose up -d
+	
+-Compose v2 :
+	docker compose build
+	docker compose up -d
 
+-Check :
+	curl http://localhost:8080/health
+	curl http://localhost:8080/cves
 
+-Stop :
+	docker-compose down
+	# or: docker compose down
