@@ -114,3 +114,20 @@ cp src/main/resources/application.properties.example src/main/resources/applicat
 	docker-compose down
 	# or: docker compose down
 ```
+
+## Testing (GET & POST)
+
+Once the containers are running, you can test the application using both **POST** and **GET** requests. To trigger ingestion from the NVD API, send a POST request with a date window (format `YYYY-MM-DD`), for example:  
+```bash
+curl -s -X POST "http://localhost:8080/api/ingest?start=2025-09-16&end=2025-09-17"
+# Example output:
+# Inserted 40 (duplicates: 0) for 2025-09-16 → 2025-09-17
+```
+After ingestion, you can verify the database state with GET requests:
+```bash
+curl -i http://localhost:8080/health         # → 200 OK + "OK"
+curl -s "http://localhost:8080/cves?page=0&size=5" | jq .   # → list of CVEs
+curl -s http://localhost:8080/cves/count     # → total number of CVEs (e.g., 41)
+```
+
+
